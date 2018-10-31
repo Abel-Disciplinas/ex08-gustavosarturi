@@ -11,26 +11,42 @@ function regressao_polinomial(x, y, p)
     return β
 end
 
-function KFold(x,y; num_folds = 5, max_p = 15)
-    if length(x) != length(y) ##Check-out
-        error("Os dados estão incompatíveis!")
+function kfold(x::Array, y::Array; num_folds = 5, max_p = 15)
+    if length(x) != length(y)
+        error("Dados são incompatíveis!")
     end
     
-    m = length(x) ##[✓]
-    I = randperm(m) ##[✓]Randomiza os índices;
-    sort_data = zeros(m,2) ##Cria uma matriz auxiliar p/ embaralhar
-    for i=1:m ##[✓]Embaralha a ordem dos dados
-        sort_data[i,1] = x[I[i]]
-        sort_data[i,2] = y[I[i]]
+    m = length(x)
+    I = randperm(m)
+    fold_size = div(m, num_folds)
+    E_Treino(num_folds, max_p)
+    E_teste(num_folds, max_p)
+
+    for fold=1:fold_size
+        cjto_teste = fold
+        cjto_treino = setdiff(1:m, fold)
+        
     end
-    fold_size = div(m, num_folds) ##[✓] Tamanho do Fold
-    traine_size = m - fold_size ##Tamanho do Fold Complementar
-    E_treino = zeros(traine_size) ##[✓] E_treino zerada
-    E_teste = zeros(fold_size) ##[✓] E_teste zerada
+end 
 
-    for j=1:fold_size
-        E_treino = 
-    end    
+fold_size = 5
 
-    return ∂
+X = [1,2,3,4,5,6,7,8,9,10]
+Y = [11,12,13,14,15,16,17,18,19,20]
+m = length(X)
+for fold=1:m
+    cjto_teste = fold
+    cjto_treino = setdiff(1:m, fold)
+    Teste = X[cjto_teste]
+    Treino = Y[cjto_treino]
+    for p = 1:max_p
+        
+    end
+    println(cjto_teste, cjto_treino, Treino, Teste)
 end
+
+Treino
+println()
+
+I = randperm(5)
+
