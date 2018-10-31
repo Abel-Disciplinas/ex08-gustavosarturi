@@ -27,7 +27,7 @@ function kfold(x::Array, y::Array; num_folds = 5, max_p = 15)
         cjto_treino = setdiff(1:m, fold)
         Testex = X[cjto_teste]
         Testey = Y[cjto_teste]
-        Treinox = Y[cjto_treino]
+        Treinox = X[cjto_treino]
         Treinoy = Y[cjto_treino]
         for p = 1:max_p
             β = regressao_polinomial(Treinox, Treinoy, p)
