@@ -15,38 +15,30 @@ function kfold(x::Array, y::Array; num_folds = 5, max_p = 15)
     if length(x) != length(y)
         error("Dados são incompatíveis!")
     end
-    
+
     m = length(x)
     I = randperm(m)
     fold_size = div(m, num_folds)
     E_Treino(num_folds, max_p)
     E_teste(num_folds, max_p)
 
-    for fold=1:fold_size
+    for fold=1:m
         cjto_teste = fold
         cjto_treino = setdiff(1:m, fold)
-        
+        Testex = X[cjto_teste]
+        Testey = Y[cjto_teste]
+        Treinox = Y[cjto_treino]
+        Treinoy = Y[cjto_treino]
+        for p = 1:max_p
+            β = regressao_polinomial(Treinox, Treinoy, p)
+            xlin = range(0, stop=2pi, length=100)
+            
+            y_pred = [β[1] + sum(β[j + 1] * xi^j for j = 1:p) for xi = xlin]
+    
+            E_teste = 1/2
+            scatter(X, Y, leg=false)
+            ylims!(4.9, 8.1)
+            png("test_$p")
+        end
     end
-end 
-
-fold_size = 5
-
-X = [1,2,3,4,5,6,7,8,9,10]
-Y = [11,12,13,14,15,16,17,18,19,20]
-m = length(X)
-for fold=1:m
-    cjto_teste = fold
-    cjto_treino = setdiff(1:m, fold)
-    Teste = X[cjto_teste]
-    Treino = Y[cjto_treino]
-    for p = 1:max_p
-        
-    end
-    println(cjto_teste, cjto_treino, Treino, Teste)
 end
-
-Treino
-println()
-
-I = randperm(5)
-
