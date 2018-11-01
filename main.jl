@@ -1,24 +1,20 @@
 using Plots
-gr(size=(600,400))
+gr(size=(600, 400))
 default(fmt = :png)
 
-function main()
-    # Ler dados.csv
+data = readcsv("dados.csv")
+x, y = data[:,1], data[:,2]
 
-    kfold(x, y)
-
-    p = 1 ####### Sua escolha
-    xlin = linspace(extrema(x)..., 100)
-    β = regressao_polinomial(x, y, p)
-    ylin = β[1] * ones(100)
-    for j = 1:p
-        ylin .+= β[j+1] * xlin.^j
+function regressao_polinomial(x::Array, y::Array, p::Integer)
+    m = length(x)
+    A = ones(m, p+1)
+    for i=1:m
+        for j=2:p+1
+            A[i,j] = x[i]^(j-1)
+        end
     end
-    scatter(x, y, ms=3, c=:blue)
-    plot!(xlin, ylin, c=:red, lw=2)
-    png("ajuste")
-
-    # Calcule a medida R²
+    β = (A' * A) \ (A' * y)
+    return β
 end
 
 function regressao_polinomial(x, y, p)
@@ -28,37 +24,56 @@ function regressao_polinomial(x, y, p)
     return β
 end
 
-function kfold(x::Array, y::Array; num_folds = 5, max_p = 15)
-    if length(x) != length(y)
-        error("Dados são incompatíveis!")
-    end
 
+#Vamos supor que nossos dados sejam esses:
+x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+y = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+function kfold(x, y; num_folds = 5, max_p=15)
+    num_folds = 2
+    max_p = 15
     m = length(x)
     I = randperm(m)
     fold_size = div(m, num_folds)
-    E_Treino(num_folds, max_p)
-    E_teste(num_folds, max_p)
+    traine_size = m - fold_size
 
-    for fold=1:m
-        cjto_teste = fold
-        cjto_treino = setdiff(1:m, fold)
-        Testex = X[cjto_teste]
-        Testey = Y[cjto_teste]
-        Treinox = Y[cjto_treino]
-        Treinoy = Y[cjto_treino]
+    E_teste = zeros(num_folds, max_p)
+    E_treino = zeros(num_folds, max_p)
+
+    i_fold = 1
+
+    for fold=1:fold_size:m
+        #println("i_fold é = ", i_fold)
+        cjto_teste = fold:fold + fold_size - 1
+        cjto_treino = setdiff(1:m, cjto_teste)
+
+        Testex = x[cjto_teste]
+        Testey = y[cjto_teste]
+        Treinox = x[cjto_treino]
+        Treinoy = y[cjto_treino]
+
         for p = 1:max_p
             β = regressao_polinomial(Treinox, Treinoy, p)
-            xlin = range(0, stop=2pi, length=100)
-
-            y_pred = [β[1] + sum(β[j + 1] * xi^j for j = 1:p) for xi = xlin]
-
-            E_teste = 1/2
-            scatter(X, Y, leg=false)
-            ylims!(4.9, 8.1)
+            y_pred = [β[1] + sum(β[j+1] * xi^j for j = 1:p) for xi = x]
+            E_teste[i_fold,p] = norm(y[cjto_teste] - y_pred[cjto_teste])^2
+            E_treino[i_fold,p] = norm(y[cjto_treino] - y_pred[cjto_treino])^2
         end
+        println("E_teste = ", E_teste)
+        println("E_treino = ", E_treino)
+        png("kfold-$fold")
+        i_fold += 1
     end
-    
-    png("test_$p")
 end
+println()
 
-main()
+kfold(x,y)
+
+E_teste
+
+#=for fold=1:fold_size:m
+    cjto_teste = fold
+    cjto_treino = setdiff(1:m, fold)
+    for k=fold:fold + fold_size - 1 #Separa os valores de treino
+        E_teste = [x[k], y[k]]
+    end
+end=#
