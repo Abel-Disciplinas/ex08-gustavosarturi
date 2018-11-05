@@ -11,6 +11,7 @@ function regressao_polinomial(x::Array, y::Array, p::Integer)
 end
 
 function main()
+
     data = readcsv("dados.csv")
     x, y = data[:,1], data[:,2]
 
@@ -25,7 +26,7 @@ function main()
     scatter(x, y, ms=3, c=:blue)
     plot!(xlin, ylin, c=:red, lw=2)
     png("ajuste")
-    
+
     m = length(x)
     y_pred = zeros(1,m)
     for i=1:m
@@ -46,7 +47,7 @@ function main()
 end
 
 function kfold(x, y; num_folds = 5, max_p=15)
-    num_folds = 2
+    num_folds = 5
     max_p = 15
     m = length(x)
     I = randperm(m)
@@ -58,6 +59,7 @@ function kfold(x, y; num_folds = 5, max_p=15)
 
     i_fold = 1
 
+    plot()
     for fold=1:fold_size:m
         #println("i_fold é = ", i_fold)
         cjto_teste = fold:fold + fold_size - 1
@@ -73,10 +75,14 @@ function kfold(x, y; num_folds = 5, max_p=15)
             y_pred = [β[1] + sum(β[j+1] * xi^j for j = 1:p) for xi = x]
             E_teste[i_fold,p] = norm(y[cjto_teste] - y_pred[cjto_teste])^2
             E_treino[i_fold,p] = norm(y[cjto_treino] - y_pred[cjto_treino])^2
-        end   
+        end
+
+        plot!(1:max_p, E_treino[i_fold,:], ms=3  )
+        png("test_$i_fold")
         i_fold += 1
     end
 end
 
 println()
 main()
+
